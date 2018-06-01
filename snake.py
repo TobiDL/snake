@@ -109,13 +109,13 @@ class SnakeGame:
                 if event.type == pygame.QUIT:  
                     self._running = False  
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_w:  
+                    if event.key == pygame.K_w and self.snake.direction != 3:  
                         self.snake.direction = 0
-                    if event.key == pygame.K_d:  
+                    if event.key == pygame.K_d and self.snake.direction != 2:  
                         self.snake.direction = 1
-                    if event.key == pygame.K_a:  
+                    if event.key == pygame.K_a and self.snake.direction != 1:  
                         self.snake.direction = 2
-                    if event.key == pygame.K_s:  
+                    if event.key == pygame.K_s and self.snake.direction != 0:  
                         self.snake.direction = 3
 
             #updates the board
