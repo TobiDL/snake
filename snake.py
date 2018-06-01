@@ -53,7 +53,7 @@ class SnakeGame:
 
         self.apple = Apple()
 
-    def display_board(self):
+    def print_board(self):
         for line in self.board:
             conv = [str(x) for x in line]
             print(' '.join(conv))
@@ -61,6 +61,9 @@ class SnakeGame:
     def update_board(self):
 
         self.board = np.zeros((20,20), dtype = np.int8)
+
+        if len(set(self.snake.body)) != len(self.snake.body):
+            self._running = False
 
         for pos in self.snake.body:
             x = pos[0]
@@ -84,7 +87,9 @@ class SnakeGame:
         pygame.init()
         screen = pygame.display.set_mode((self.window_width, self.window_height))
         pygame.display.set_caption('Snake')
+
         font = pygame.font.SysFont("monospace", 15)
+        font2 = pygame.font.SysFont("monospace", 80)
 
 
         clock = pygame.time.Clock()
@@ -137,6 +142,15 @@ class SnakeGame:
             clock.tick(60)
             pygame.display.flip()
             ctr += 1
+        
+        screen.fill(BLACK)
+        end = font2.render("GAME OVER", 1, WHITE)
+        screen.blit(end, (20, 200))
+        pygame.display.flip()
+
+        pygame.time.wait(1000)
+
+
 
     def move(self):
         #0 - up
