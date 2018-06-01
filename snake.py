@@ -8,9 +8,9 @@ WHITE = (255,255,255)
 RED = (255,0,0)
 BLUE = (0,0,255)
 
-MARGIN = 4
-WIDTH = 26
-HEIGHT = 26
+MARGIN = 1
+WIDTH = 23
+HEIGHT = 23
 
 class Apple:
 
@@ -42,8 +42,10 @@ class SnakeGame:
 
     def __init__(self):
 
-        self.window_width = 604
-        self.window_height = 604
+        self.score = 0
+
+        self.window_width = 482
+        self.window_height = 500
 
         self.board = np.zeros((20,20), dtype = np.int8)
 
@@ -82,6 +84,9 @@ class SnakeGame:
         pygame.init()
         screen = pygame.display.set_mode((self.window_width, self.window_height))
         pygame.display.set_caption('Snake')
+        font = pygame.font.SysFont("monospace", 15)
+
+
         clock = pygame.time.Clock()
 
         self._running = True
@@ -121,6 +126,10 @@ class SnakeGame:
                                       (MARGIN + HEIGHT) * row + MARGIN,
                                       WIDTH,
                                       HEIGHT))
+
+                    label = font.render("Score: "+str(self.score), 1, RED)
+                    screen.blit(label, (10, 483))
+
             if ctr % 6 == 0:
                 self.move()
             
@@ -128,8 +137,6 @@ class SnakeGame:
             clock.tick(60)
             pygame.display.flip()
             ctr += 1
-
-
 
     def move(self):
         #0 - up
@@ -144,6 +151,7 @@ class SnakeGame:
             if self.snake.head == self.apple.position:
                 self.snake.eat((x,y))
                 self.apple.randomize()
+                self.score += 1
             else:
                 self.snake.move((x,y))
 
@@ -154,6 +162,7 @@ class SnakeGame:
             if self.snake.head == self.apple.position:
                 self.snake.eat((x,y))
                 self.apple.randomize()
+                self.score += 1
             else:
                 self.snake.move((x,y))
         elif self.snake.direction == 2:
@@ -163,6 +172,7 @@ class SnakeGame:
             if self.snake.head == self.apple.position:
                 self.snake.eat((x,y))
                 self.apple.randomize()
+                self.score += 1
             else:
                 self.snake.move((x,y))
 
@@ -173,6 +183,7 @@ class SnakeGame:
             if self.snake.head == self.apple.position:
                 self.snake.eat((x,y))
                 self.apple.randomize()
+                self.score += 1
             else:
                 self.snake.move((x,y))
 
