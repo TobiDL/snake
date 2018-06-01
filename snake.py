@@ -64,8 +64,13 @@ class SnakeGame:
 
         if len(set(self.snake.body)) != len(self.snake.body):
             self._running = False
+            return
+        elif self.snake.head[0] < 0 or self.snake.head[0] > 19 or self.snake.head[1] < 0 or self.snake.head[1] > 19:
+            self._running = False
+            return
 
         for pos in self.snake.body:
+
             x = pos[0]
             y = pos[1]
 
@@ -143,8 +148,7 @@ class SnakeGame:
             pygame.display.flip()
             ctr += 1
         
-        screen.fill(BLACK)
-        end = font2.render("GAME OVER", 1, WHITE)
+        end = font2.render("GAME OVER", 1, RED)
         screen.blit(end, (20, 200))
         pygame.display.flip()
 
