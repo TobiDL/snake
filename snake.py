@@ -8,15 +8,21 @@ WHITE = (255,255,255)
 RED = (255,0,0)
 BLUE = (0,0,255)
 
+BOARD_SIZE = 10
+
 MARGIN = 1
-WIDTH = 23
-HEIGHT = 23
+WIDTH = 25
+HEIGHT = 25
+
+
+WINDOW_WIDTH = BOARD_SIZE * 25 + BOARD_SIZE
+WINDOW_HEIGHT = BOARD_SIZE * 25 + BOARD_SIZE + 20
 
 class Snake:
 
     def __init__(self):
 
-        self.head = (randint(4,14), randint(4,14))
+        self.head = (randint(4,BOARD_SIZE- 5), (randint(4,BOARD_SIZE- 5)))
         self.body = [self.head]
 
         self.direction = 0
@@ -36,44 +42,63 @@ class SnakeGame:
 
         self.score = 0
 
-        self.window_width = 482
-        self.window_height = 500
 
-        self.board = np.zeros((20,20), dtype = np.int8)
+        self.board = np.zeros((BOARD_SIZE,BOARD_SIZE), dtype = np.int8)
 
         self.snake = Snake()
 
-        self.apple = (randint(0,19), randint(0,19))
+        self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
+
+        self.data = []
     
     def place_apple(self):
 
-        self.apple = (randint(0,19), randint(0,19))
+        self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
 
         while self.apple in self.snake.body:
-            self.apple = (randint(0,19), randint(0,19))
+            self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
+
+        self.save_data()
     
     def print_board(self):
         for line in self.board:
             conv = [str(x) for x in line]
             print(' '.join(conv))
+    
+    def record_data(self):
+            
+            flat = self.board.flatten()
+            data = [str(x) for x in flat]
+            data = ','.join(data)+','+str(self.snake.direction)+'\n'
+
+            self.data.append(data)
+
+    def save_data(self):
+
+        with open('data/snake_data_'+str(BOARD_SIZE)+'.txt', 'a') as file:
+            for x in self.data:
+                file.write(x)
+        self.data = []
 
     def update_board(self):
 
-        self.board = np.zeros((20,20), dtype = np.int8)
+        self.board = np.zeros((BOARD_SIZE,BOARD_SIZE), dtype = np.int8)
 
         if len(set(self.snake.body)) != len(self.snake.body):
             self._running = False
             return
-        elif self.snake.head[0] < 0 or self.snake.head[0] > 19 or self.snake.head[1] < 0 or self.snake.head[1] > 19:
+        elif self.snake.head[0] < 0 or self.snake.head[0] > BOARD_SIZE-1 or self.snake.head[1] < 0 or self.snake.head[1] > BOARD_SIZE-1:
             self._running = False
             return
 
         for pos in self.snake.body:
-
             x = pos[0]
             y = pos[1]
+            
 
-            if self.board[x][y] != 0:
+            if pos == self.snake.head:
+                self.board[x][y] = 3
+            elif self.board[x][y] != 0:
                 return False
             else:
                 self.board[x][y] = 1
@@ -89,11 +114,11 @@ class SnakeGame:
     def run_game(self):
 
         pygame.init()
-        screen = pygame.display.set_mode((self.window_width, self.window_height))
+        screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption('Snake')
 
-        font = pygame.font.SysFont("monospace", 15)
-        font2 = pygame.font.SysFont("monospace", 80)
+        font = pygame.font.SysFont("monospace", 20)
+        font2 = pygame.font.SysFont("monospace", 4*BOARD_SIZE + 5)
 
 
         clock = pygame.time.Clock()
@@ -119,13 +144,13 @@ class SnakeGame:
 
             #updates the board
             screen.fill(BLACK)
-            for row in range(20):
-                for column in range(20):
+            for row in range(BOARD_SIZE):
+                for column in range(BOARD_SIZE):
 
                     tile = self.board[row][column]
                     if tile == 0:
                         color = WHITE
-                    if tile == 1:
+                    if tile == 1 or tile == 3:
                         color = BLUE
                     if tile == 2:
                         color = RED
@@ -137,18 +162,19 @@ class SnakeGame:
                                       HEIGHT))
 
                     label = font.render("Score: "+str(self.score), 1, RED)
-                    screen.blit(label, (10, 483))
+                    screen.blit(label, (10, WINDOW_WIDTH))
 
             if ctr % 10 == 0:
                 self.move()
-            
-            self.update_board()
+                self.update_board()
+                self.record_data()
+
             clock.tick(60)
             pygame.display.flip()
             ctr += 1
         
         end = font2.render("GAME OVER", 1, RED)
-        screen.blit(end, (20, 200))
+        screen.blit(end, (BOARD_SIZE, 10*BOARD_SIZE))
         pygame.display.flip()
 
         pygame.time.wait(1000)
