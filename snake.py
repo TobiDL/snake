@@ -51,6 +51,8 @@ class SnakeGame:
         self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
 
         self.training = training
+        self.features = None
+
 
         if self.training:
             self.data = []
@@ -65,23 +67,60 @@ class SnakeGame:
         while self.apple in self.snake.body:
             self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
 
-        self.save_data()
+        if self.training:
+            self.save_data()
     
     def print_board(self):
         for line in self.board:
             conv = [str(x) for x in line]
             print(' '.join(conv))
     
-    def record_data(self):
+    def get_features(self):
             
-            flat = self.prev_board.flatten()
-            data = [str(x) for x in flat]
-            data = ','.join(data)+','
+            input_nodes = [0 for _ in range(10)]
+
+            x,y = self.snake.head
+            a,b = self.apple
+
+            if x == 0 or self.board[x-1][y] == 1:
+                input_nodes[0] = 1
+
+            if y == BOARD_SIZE-1 or self.board[x][y+1] == 1:
+                input_nodes[1] = 1
+
+            if y == 0 or self.board[x][y-1] == 1:
+                input_nodes[2] = 1
+
+            if x == BOARD_SIZE-1 or self.board[x][y-1] == 1:
+                input_nodes[3] = 1
+
+            if a < x:
+                input_nodes[4] = 1
+
+            if b > y:
+                input_nodes[5] = 1
+
+            if b < y:
+                input_nodes[6] = 1
+
+            if a > x:
+                input_nodes[7] = 1
+
+            input_nodes[8] = abs(x-a) + abs(y-b)
+            input_nodes[9] = self.snake.direction
+
+            self.features = input_nodes
+
+    def record_data(self):
+
             output = ['0','0','0','0']
             output[self.snake.direction] = '1'
-            data += ','.join(output) +'\n'
+
+            data = ','.join([str(x) for x in self.features]) + ',' + ','.join(output)+'\n'
 
             self.data.append(data)
+            
+            print(data)
 
     def save_data(self):
 
@@ -142,7 +181,7 @@ class SnakeGame:
 
         while self._running:
 
-            
+
             event = pygame.event.poll()
             if event.type == pygame.QUIT:  
                 self._running = False  
@@ -157,7 +196,10 @@ class SnakeGame:
                     next_dir = 3
 
             if n and not self.training:
-                next_dir = self.nn.predict_direction(np.array([self.board.flatten()]))
+                if self.features == None:
+                    self.get_features()
+
+                next_dir = self.nn.predict_direction(np.array([self.features]))
                 n = False
 
             #updates the board
@@ -183,11 +225,13 @@ class SnakeGame:
                     screen.blit(label, (10, WINDOW_WIDTH))
 
             if ctr % 30 == 0:
+                self.get_features()
+
                 self.snake.direction = next_dir
                 self.move()
-                self.prev_board = self.board
                 self.update_board()
                 
+
                 if self.training:
                     self.record_data()
                 
@@ -202,8 +246,6 @@ class SnakeGame:
         pygame.display.flip()
 
         pygame.time.wait(1000)
-
-
 
     def move(self):
         #0 - up

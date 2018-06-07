@@ -12,8 +12,8 @@ class Snake_nn:
 
 		self.dataset = np.loadtxt("data/snake_data_10.txt", delimiter = ",")
 
-		self.X = self.dataset[:,0:100]
-		self.Y = self.dataset[:,100:104]
+		self.X = self.dataset[:,0:10]
+		self.Y = self.dataset[:,10:14]
 
 		if load:
 			self.load_model()
@@ -24,12 +24,12 @@ class Snake_nn:
 	def init_model(self):
 		
 		self.model = Sequential()
-		self.model.add(Dense(16, input_dim=100, activation='sigmoid'))
+		self.model.add(Dense(64, input_dim=10, activation='relu'))
 		self.model.add(Dense(4, activation='sigmoid'))
 
 		self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
 
-		self.model.fit(self.X, self.Y, epochs=250, batch_size=10)
+		self.model.fit(self.X, self.Y, epochs=400, batch_size=10)
 
 
 	def load_model(self):
@@ -50,9 +50,9 @@ class Snake_nn:
 
 		self.model.save_weights("model/model_10.h5")
 
-	def predict_direction(self, board):
+	def predict_direction(self, input):
 
-		scores = self.model.predict(board)
+		scores = self.model.predict(input)
 		print(scores)
 		return scores.argmax()
 
