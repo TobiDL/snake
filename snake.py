@@ -3,6 +3,8 @@ import numpy as np
 import os
 from random import randint
 
+from neural_net import Snake_nn
+
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 RED = (255,0,0)
@@ -38,19 +40,24 @@ class Snake:
 
 class SnakeGame:
 
-    def __init__(self):
+    def __init__(self, training = True):
 
         self.score = 0
 
-
         self.board = np.zeros((BOARD_SIZE,BOARD_SIZE), dtype = np.int8)
+        self.prev_board = None
 
         self.snake = Snake()
-
         self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
 
-        self.data = []
-    
+        self.training = training
+
+        if self.training:
+            self.data = []
+        else:
+            self.nn = Snake_nn(load = True)
+
+
     def place_apple(self):
 
         self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
@@ -67,7 +74,7 @@ class SnakeGame:
     
     def record_data(self):
             
-            flat = self.board.flatten()
+            flat = self.prev_board.flatten()
             data = [str(x) for x in flat]
             data = ','.join(data)+','+str(self.snake.direction)+'\n'
 
@@ -126,6 +133,10 @@ class SnakeGame:
         self._running = True
         ctr = 0
 
+        n = True
+
+        next_dir = 0
+
         while self._running:
 
             
@@ -134,13 +145,17 @@ class SnakeGame:
                 self._running = False  
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_w and self.snake.direction != 3:  
-                    self.snake.direction = 0
+                    next_dir = 0
                 if event.key == pygame.K_d and self.snake.direction != 2:  
-                    self.snake.direction = 1
+                    next_dir = 1
                 if event.key == pygame.K_a and self.snake.direction != 1:  
-                    self.snake.direction = 2
+                    next_dir = 2
                 if event.key == pygame.K_s and self.snake.direction != 0:  
-                    self.snake.direction = 3
+                    next_dir = 3
+
+            if n and not self.training:
+                self.snake.direction = self.nn.predict_direction(np.array([self.board.flatten()]))
+                n = False
 
             #updates the board
             screen.fill(BLACK)
@@ -165,9 +180,15 @@ class SnakeGame:
                     screen.blit(label, (10, WINDOW_WIDTH))
 
             if ctr % 10 == 0:
+                self.snake.direction = next_dir
                 self.move()
+                self.prev_board = self.board
                 self.update_board()
-                self.record_data()
+                
+                if self.training:
+                    self.record_data()
+                
+                n = True
 
             clock.tick(60)
             pygame.display.flip()
@@ -191,7 +212,7 @@ class SnakeGame:
             x = self.snake.head[0]-1
             y = self.snake.head[1]
 
-            if self.snake.head == self.apple:
+            if (x,y) == self.apple:
                 self.snake.eat((x,y))
                 self.place_apple()
                 self.score += 1
@@ -202,7 +223,7 @@ class SnakeGame:
             x = self.snake.head[0]
             y = self.snake.head[1]+1
             
-            if self.snake.head == self.apple:
+            if (x,y) == self.apple:
                 self.snake.eat((x,y))
                 self.place_apple()
                 self.score += 1
@@ -212,7 +233,7 @@ class SnakeGame:
             x = self.snake.head[0]
             y = self.snake.head[1]-1
 
-            if self.snake.head == self.apple:
+            if (x,y) == self.apple:
                 self.snake.eat((x,y))
                 self.place_apple()
                 self.score += 1
@@ -223,7 +244,7 @@ class SnakeGame:
             x = self.snake.head[0]+1
             y = self.snake.head[1]
 
-            if self.snake.head == self.apple:
+            if (x,y) == self.apple:
                 self.snake.eat((x,y))
                 self.place_apple()
                 self.score += 1
@@ -231,5 +252,5 @@ class SnakeGame:
                 self.snake.move((x,y))
 
 
-game = SnakeGame()
+game = SnakeGame(training = True)
 game.run_game()

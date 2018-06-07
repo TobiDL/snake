@@ -50,9 +50,8 @@ class Snake_nn:
 
 		self.model.save_weights("model/model_10.h5")
 
-	def predict_direction(self):
+	def predict_direction(self, board):
 
-		board = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
 		scores = self.model.predict(board)
 		
 		return int(scores[0])
