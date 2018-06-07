@@ -40,7 +40,7 @@ class Snake:
 
 class SnakeGame:
 
-    def __init__(self, training = True):
+    def __init__(self, training = True, load = True):
 
         self.score = 0
 
@@ -55,7 +55,7 @@ class SnakeGame:
         if self.training:
             self.data = []
         else:
-            self.nn = Snake_nn(load = True)
+            self.nn = Snake_nn(load = load)
 
 
     def place_apple(self):
@@ -76,7 +76,10 @@ class SnakeGame:
             
             flat = self.prev_board.flatten()
             data = [str(x) for x in flat]
-            data = ','.join(data)+','+str(self.snake.direction)+'\n'
+            data = ','.join(data)+','
+            output = ['0','0','0','0']
+            output[self.snake.direction] = '1'
+            data += ','.join(output) +'\n'
 
             self.data.append(data)
 
@@ -154,7 +157,7 @@ class SnakeGame:
                     next_dir = 3
 
             if n and not self.training:
-                self.snake.direction = self.nn.predict_direction(np.array([self.board.flatten()]))
+                next_dir = self.nn.predict_direction(np.array([self.board.flatten()]))
                 n = False
 
             #updates the board
@@ -179,7 +182,7 @@ class SnakeGame:
                     label = font.render("Score: "+str(self.score), 1, RED)
                     screen.blit(label, (10, WINDOW_WIDTH))
 
-            if ctr % 10 == 0:
+            if ctr % 30 == 0:
                 self.snake.direction = next_dir
                 self.move()
                 self.prev_board = self.board
@@ -252,5 +255,5 @@ class SnakeGame:
                 self.snake.move((x,y))
 
 
-game = SnakeGame(training = True)
+game = SnakeGame(training = False, load = True)
 game.run_game()
