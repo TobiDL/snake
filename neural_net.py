@@ -4,6 +4,8 @@ from keras.models import model_from_json
 
 import numpy as np 
 
+np.random.seed(420)
+
 class Snake_nn:
 
 	def __init__(self, load = False):
@@ -12,8 +14,8 @@ class Snake_nn:
 
 		self.dataset = np.loadtxt("data/snake_data_10.txt", delimiter = ",")
 
-		self.X = self.dataset[:,0:10]
-		self.Y = self.dataset[:,10:14]
+		self.X = self.dataset[:,0:13]
+		self.Y = self.dataset[:,13:17]
 
 		if load:
 			self.load_model()
@@ -24,12 +26,12 @@ class Snake_nn:
 	def init_model(self):
 		
 		self.model = Sequential()
-		self.model.add(Dense(64, input_dim=10, activation='relu'))
-		self.model.add(Dense(4, activation='sigmoid'))
+		self.model.add(Dense(24, input_dim=13, activation='relu'))
+		self.model.add(Dense(4, activation='softmax'))
 
-		self.model.compile(loss='mean_squared_error', optimizer='adam', metrics=['accuracy'])
+		self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-		self.model.fit(self.X, self.Y, epochs=400, batch_size=10)
+		self.model.fit(self.X, self.Y, epochs=400, batch_size=50)
 
 
 	def load_model(self):
@@ -39,7 +41,7 @@ class Snake_nn:
 
 		self.model = model_from_json(model_json)
 		self.model.load_weights("model/model_10.h5")
-		self.model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+		self.model.compile(loss='mean_squared_error', optimizer='sgd', metrics=['accuracy'])
 
 
 	def save_model(self):
@@ -51,7 +53,7 @@ class Snake_nn:
 		self.model.save_weights("model/model_10.h5")
 
 	def predict_direction(self, input):
-
+		print(input)
 		scores = self.model.predict(input)
 		print(scores)
 		return scores.argmax()

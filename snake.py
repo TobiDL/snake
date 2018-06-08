@@ -77,7 +77,7 @@ class SnakeGame:
     
     def get_features(self):
             
-            input_nodes = [0 for _ in range(10)]
+            input_nodes = [0 for _ in range(13)]
 
             x,y = self.snake.head
             a,b = self.apple
@@ -107,7 +107,8 @@ class SnakeGame:
                 input_nodes[7] = 1
 
             input_nodes[8] = abs(x-a) + abs(y-b)
-            input_nodes[9] = self.snake.direction
+            
+            input_nodes[9 + self.snake.direction] = 1
 
             self.features = input_nodes
 
@@ -196,8 +197,7 @@ class SnakeGame:
                     next_dir = 3
 
             if n and not self.training:
-                if self.features == None:
-                    self.get_features()
+                self.get_features()
 
                 next_dir = self.nn.predict_direction(np.array([self.features]))
                 n = False
@@ -224,9 +224,7 @@ class SnakeGame:
                     label = font.render("Score: "+str(self.score), 1, RED)
                     screen.blit(label, (10, WINDOW_WIDTH))
 
-            if ctr % 30 == 0:
-                self.get_features()
-
+            if ctr % 10 == 0:
                 self.snake.direction = next_dir
                 self.move()
                 self.update_board()
