@@ -31,7 +31,7 @@ class Snake_nn:
 
 		self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-		self.model.fit(self.X, self.Y, epochs=400, batch_size=50)
+		self.model.fit(self.X, self.Y, epochs=200, batch_size=50)
 
 
 	def load_model(self):

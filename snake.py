@@ -91,7 +91,7 @@ class SnakeGame:
             if y == 0 or self.board[x][y-1] == 1:
                 input_nodes[2] = 1
 
-            if x == BOARD_SIZE-1 or self.board[x][y-1] == 1:
+            if x == BOARD_SIZE-1 or self.board[x+1][y] == 1:
                 input_nodes[3] = 1
 
             if a < x:
@@ -197,6 +197,7 @@ class SnakeGame:
                     next_dir = 3
 
             if n and not self.training:
+                
                 self.get_features()
 
                 next_dir = self.nn.predict_direction(np.array([self.features]))
@@ -231,6 +232,7 @@ class SnakeGame:
                 
 
                 if self.training:
+                    self.get_features()
                     self.record_data()
                 
                 n = True
