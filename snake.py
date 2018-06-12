@@ -5,6 +5,7 @@ from random import randint
 
 from neural_net import Snake_nn
 
+#Preset colors
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 RED = (255,0,0)
@@ -27,12 +28,15 @@ class Snake:
         self.head = (randint(4,BOARD_SIZE- 5), (randint(4,BOARD_SIZE- 5)))
         self.body = [self.head]
 
+        #direction the snake is facing
         self.direction = 0
 
+    #use when head is on top of apple
     def eat(self, tuple):
         self.body.insert(0, tuple)
         self.head = self.body[0]
 
+    #use for regular movement
     def move(self, tuple):
         self.body.insert(0, tuple)
         self.body = self.body[:-1]
@@ -50,6 +54,7 @@ class SnakeGame:
         self.snake = Snake()
         self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
 
+        #If true, nn will be disabled and the user can train the snake manually
         self.training = training
         self.features = None
 
@@ -59,7 +64,7 @@ class SnakeGame:
         else:
             self.nn = Snake_nn(load = load)
 
-
+    #Places the apple in an empty board space
     def place_apple(self):
 
         self.apple = (randint(0,BOARD_SIZE-1), randint(0,BOARD_SIZE-1))
@@ -70,11 +75,13 @@ class SnakeGame:
         if self.training:
             self.save_data()
     
+    #prints the board state on the console   
     def print_board(self):
         for line in self.board:
             conv = [str(x) for x in line]
             print(' '.join(conv))
     
+    #Collects features to train or predict
     def get_features(self):
             
             input_nodes = [0 for _ in range(13)]
@@ -112,6 +119,7 @@ class SnakeGame:
 
             self.features = input_nodes
 
+    #Appends features to temporary cache
     def record_data(self):
 
             output = ['0','0','0','0']
@@ -120,16 +128,16 @@ class SnakeGame:
             data = ','.join([str(x) for x in self.features]) + ',' + ','.join(output)+'\n'
 
             self.data.append(data)
-            
-            print(data)
-
+          
+    #Appends features stored in cache into data folder  
     def save_data(self):
 
-        with open('data/snake_data_'+str(BOARD_SIZE)+'.txt', 'a') as file:
+        with open('data/snake_data.txt', 'a') as file:
             for x in self.data:
                 file.write(x)
         self.data = []
 
+    #Update board matrix and checks for colision
     def update_board(self):
 
         self.board = np.zeros((BOARD_SIZE,BOARD_SIZE), dtype = np.int8)
@@ -161,21 +169,22 @@ class SnakeGame:
         else:
             self.board[x][y] = 2
 
+    #Main loop
     def run_game(self):
 
         pygame.init()
         screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption('Snake')
 
+        #score font
         font = pygame.font.SysFont("monospace", 20)
+        #game over font
         font2 = pygame.font.SysFont("monospace", 4*BOARD_SIZE + 5)
-
 
         clock = pygame.time.Clock()
 
         self._running = True
         ctr = 0
-
         n = True
 
         next_dir = 0
@@ -225,6 +234,7 @@ class SnakeGame:
                     label = font.render("Score: "+str(self.score), 1, RED)
                     screen.blit(label, (10, WINDOW_WIDTH))
 
+            #dictates game speed
             if ctr % 10 == 0:
                 self.snake.direction = next_dir
                 self.move()
@@ -247,6 +257,7 @@ class SnakeGame:
 
         pygame.time.wait(1000)
 
+    #Moves the snake to the direction its facing
     def move(self):
         #0 - up
         #1 - right
