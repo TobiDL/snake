@@ -306,7 +306,3 @@ class SnakeGame:
                 self.score += 1
             else:
                 self.snake.move((x,y))
-
-
-game = SnakeGame(training = False, load = True)
-game.run_game()
